@@ -1,0 +1,61 @@
+# Default values for cp-rest.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: confluentinc/cp-kafka-rest
+  tag: "5.2.1"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: "rest-proxy"
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    certmanager.k8s.io/cluster-issuer: letsencrypt-staging
+    ingress.kubernetes.io/whitelist-source-range: "66.85.67.20/32"
+    kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: rest-proxy.us-dev.dexcom-apps.com
+      paths: ["/"]
+  tls:
+  - secretName: tls-staging-cert
+    hosts:
+    - "rest-proxy.us-dev.dexcom-apps.com"
+    - "control-center.us-dev.dexcom-apps.com"
+    - "ksql-server.us-dev.dexcom-apps.com"
+    - "event-bus.us-dev.dexcom-apps.com"
+    - "connect.us-dev.dexcom-apps.com"
+    - "schema-registry.us-dev.dexcom-apps.com"
+    - "topic-browser.us-dev.dexcom-apps.com"
+    - "py-notebook.us-dev.dexcom-apps.com"
+
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+

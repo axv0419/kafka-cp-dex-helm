@@ -1,0 +1,6 @@
+apiVersion: v1
+data:
+  BOOTSTRAP_SERVERS: "{{ .Values.bootstrapServers }}"
+kind: ConfigMap
+metadata:
+  name: ccloud-config

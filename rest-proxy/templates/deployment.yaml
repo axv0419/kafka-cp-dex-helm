@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rest-proxy.fullname" . }}
+  labels:
+{{ include "rest-proxy.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "rest-proxy.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "rest-proxy.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+
+          env:
+            - name: KAFKA_REST_BOOTSTRAP_SERVERS
+              valueFrom:
+                configMapKeyRef:
+                  name: ccloud-config
+                  key: BOOTSTRAP_SERVERS
+            - name: KAFKA_REST_CLIENT_BOOTSTRAP_SERVERS
+              valueFrom:
+                configMapKeyRef:
+                  name: ccloud-config
+                  key: BOOTSTRAP_SERVERS
+            - name: KAFKA_REST_CLIENT_SASL_JAAS_CONFIG
+              valueFrom:
+                secretKeyRef:
+                  name: ccloud-auth
+                  key: SASL_JAAS_CONFIG
+            - name: KAFKA_REST_CLIENT_SASL_MECHANISM
+              value: PLAIN
+            - name: KAFKA_REST_CLIENT_SECURITY_PROTOCOL
+              value: SASL_SSL
+            - name: KAFKA_REST_CLIENT_SSL_ENDPOINT_IDENTIFIED_ALGORITHM
+              value: https
+            - name: KAFKA_REST_CONSUMER_REQUEST_TIMEOUT_MS
+              value: "30000"
+            - name: KAFKA_REST_HOST_NAME
+              value: rest-proxy
+            - name: KAFKA_REST_LISTENERS
+              value: http://0.0.0.0:80
+            - name: KAFKA_REST_REQUEST_TIMEOUT_MS
+              value: "20000"
+            - name: KAFKA_REST_RETRY_BACKOFF_MS
+              value: "500"
+            - name: KAFKA_REST_SASL_JAAS_CONFIG
+              valueFrom:
+                secretKeyRef:
+                  name: ccloud-auth
+                  key: SASL_JAAS_CONFIG
+            - name: KAFKA_REST_SASL_MECHANISM
+              value: PLAIN
+            - name: KAFKA_REST_SCHEMA_REGISTRY_URL
+              value: http://schema-registry:8085
+            - name: KAFKA_REST_SECURITY_PROTOCOL
+              value: SASL_SSL
+            - name: KAFKA_REST_SSL_ENDPOINT_IDENTIFIED_ALGORITHM
+              value: https
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
