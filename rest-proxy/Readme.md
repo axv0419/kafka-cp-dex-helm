@@ -2,9 +2,10 @@
 ## Install Rest Proxy
 
 ```bash
-BROKER_URL="pkc-lqrjp.us-west2.gcp.confluent.cloud:9092"
-API_KEY="EO3T7XCFFK5DSA6C"
-API_SECRET="NUz1XqBj1+orYHDQLLzU/qBrZs4eolhH7cGuWv1krwEV4squqKcWt+X4ovYzS9Z/"
+
+BROKER_URL=""
+API_KEY=""
+API_SECRET=""
 
 SASL_JAAS_CONFIG=$(echo "org.apache.kafka.common.security.plain.PlainLoginModule required username\=\"${API_KEY}\" password\=\"${API_SECRET}\";" | base64 -w 0 )
 
