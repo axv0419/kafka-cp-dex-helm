@@ -15,7 +15,7 @@ helm install \
 --set saslJaasConfig="${SASL_JAAS_CONFIG}" \
 --set bootstrapServers=${BROKER_URL} 
 --name rest-proxy \
---namespace taco-tuesday .
+--namespace dexcom-warrior .
 
 # delete 
 helm del --purge rest-proxy;

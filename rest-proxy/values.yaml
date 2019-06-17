@@ -16,7 +16,6 @@ fullnameOverride: "rest-proxy"
 service:
   type: ClusterIP
   port: 80
-
 ingress:
   enabled: true
   annotations:
@@ -39,7 +38,12 @@ ingress:
     - "schema-registry.us-dev.dexcom-apps.com"
     - "topic-browser.us-dev.dexcom-apps.com"
     - "py-notebook.us-dev.dexcom-apps.com"
-
+    - "api.us-dev.dexcom-apps.com"
+    - "api.a.us-dev.dexcom-apps.com"
+    - "api.b.us-dev.dexcom-apps.com"
+    - "api.c.us-dev.dexcom-apps.com"
+    - "api.d.us-dev.dexcom-apps.com"
+    - "api.e.us-dev.dexcom-apps.com"
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
