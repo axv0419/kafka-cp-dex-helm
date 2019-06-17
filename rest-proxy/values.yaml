@@ -16,34 +16,28 @@ fullnameOverride: "rest-proxy"
 service:
   type: ClusterIP
   port: 80
+
 ingress:
   enabled: true
   annotations:
-    kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    # nginx.ingress.kubernetes.io/upstream-vhost: "santash.boolan"
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # nginx.ingress.kubernetes.io/rewrite-target: /
+    # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/whitelist-source-range: "66.85.67.20/32,76.88.0.202"
     certmanager.k8s.io/cluster-issuer: letsencrypt-staging
-    ingress.kubernetes.io/whitelist-source-range: "66.85.67.20/32"
+    kubernetes.io/ingress.class: nginx
     kubernetes.io/tls-acme: "true"
   hosts:
-    - host: rest-proxy.us-dev.dexcom-apps.com
-      paths: ["/"]
+    - host: event-bus-api-b.eu-dev.dexcom-apps.com
+      paths: 
+        - "/"
+        - "/topics"
+        - "/topics/test-01.eu.raw"
   tls:
   - secretName: tls-staging-cert
     hosts:
-    - "rest-proxy.us-dev.dexcom-apps.com"
-    - "control-center.us-dev.dexcom-apps.com"
-    - "ksql-server.us-dev.dexcom-apps.com"
-    - "event-bus.us-dev.dexcom-apps.com"
-    - "connect.us-dev.dexcom-apps.com"
-    - "schema-registry.us-dev.dexcom-apps.com"
-    - "topic-browser.us-dev.dexcom-apps.com"
-    - "py-notebook.us-dev.dexcom-apps.com"
-    - "api.us-dev.dexcom-apps.com"
-    - "api.a.us-dev.dexcom-apps.com"
-    - "api.b.us-dev.dexcom-apps.com"
-    - "api.c.us-dev.dexcom-apps.com"
-    - "api.d.us-dev.dexcom-apps.com"
-    - "api.e.us-dev.dexcom-apps.com"
+    - "event-bus-api-q.eu-dev.dexcom-apps.com"
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
