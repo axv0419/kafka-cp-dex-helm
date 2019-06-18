@@ -32,40 +32,14 @@ spec:
             - name: http
               containerPort: 80
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 8080
-              httpHeaders:
-                - name: Authorization
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ .Release.Name }}-basic-secret
-                      key: CONSUMER_BASIC_AUTH
           readinessProbe:
             httpGet:
               path: /
               port: 8080
-{{ if and .Values.enableBasicAuth (eq .Values.enableBasicAuth  true ) }}
-              httpHeaders:
-                - name: Authorization
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ .Release.Name }}-basic-secret
-                      key: CONSUMER_BASIC_AUTH
-{{ end }}
           livenessProbe:
             httpGet:
               path: /
               port: http
-{{ if and .Values.enableBasicAuth (eq .Values.enableBasicAuth  true ) }}
-              httpHeaders:
-                - name: Authorization
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ .Release.Name }}-basic-secret
-                      key: CONSUMER_BASIC_AUTH
-{{ end }}
           readinessProbe:
             httpGet:
               path: /
@@ -115,34 +89,8 @@ spec:
               value: SASL_SSL
             - name: KAFKA_REST_SSL_ENDPOINT_IDENTIFIED_ALGORITHM
               value: https
-# Basic auth - rest proxy settings
-{{ if and .Values.enableBasicAuth (eq .Values.enableBasicAuth  true ) }}
-            - name: KAFKA_REST_AUTHENTICATION_METHOD
-              value: BASIC
-            - name: KAFKA_REST_AUTHENTICATION_REALM
-              value: KafkaServer
-            - name: KAFKA_REST_AUTHENTICATION_ROLES
-              value: {{ .Values.consumerBasicAuthRole }}
-            - name: KAFKAREST_OPTS
-              value: "-Djava.security.auth.login.config=/etc/kafka-rest/rest-jaas.properties" 
-{{ end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-
-# Basic auth - rest proxy  mount property
-{{ if and .Values.enableBasicAuth (eq .Values.enableBasicAuth  true ) }}
-          volumeMounts:
-            - mountPath: /etc/kafka-rest/rest-jaas.properties
-              subPath: rest-jaas.properties
-              name: app-config
-{{ end }}
-      volumes:
-        - name: app-config
-          configMap:
-            name: {{ .Release.Name }}-configmap
-        - name: secret-config
-          secret:
-            secretName: {{ .Release.Name }}-basic-secret
 
       {{- with .Values.nodeSelector }}
       nodeSelector:

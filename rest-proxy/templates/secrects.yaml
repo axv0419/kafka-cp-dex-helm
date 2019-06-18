@@ -9,18 +9,9 @@ type: Opaque
 ---
 apiVersion: v1
 data:
-  CONSUMER_JAAS_CONFIG: {{ .Values.consumerBasicAuthConfig }}
-kind: Secret
-metadata:
-  name: {{ .Release.Name }}-basic-secret
-type: Opaque
----
-apiVersion: v1
-data:
-  SASL_JAAS_CONFIG: {{ .Values.saslJaasConfig }}
   auth: |-
     {{ .Files.Get "htpassword" | b64enc }}
 kind: Secret
 metadata:
-  name: {{ .Release.Name }}-htpass-secret
+  name: rest-auth-secret
 type: Opaque
