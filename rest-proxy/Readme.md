@@ -17,26 +17,48 @@ API_SECRET=""
 CERT_AUTH_TYPE="staging"
 
 ## Read explanation above
+CONSUMER_NAME=crm
+
 DOMAIN_NAME_SUFFIX="eu-dev.dexcom-apps.com"
-DOMAIN_NAME_PREFIX="event-bus-api-a"
-SAN_PREFIX_LIST="event-bus-api-b,event-bus-api-c,event-bus-api-d,event-bus-api-e,event-bus-api-f"
+DOMAIN_NAME_PREFIX="event-bus-api-${CONSUMER_NAME}"
+SAN_PREFIX_LIST="event-bus-api-a,event-bus-api-b,event-bus-api-c,event-bus-api-d,event-bus-api-e"
 
+MICROSERVICE_NAME="rest-proxy-${CONSUMER_NAME}"
+NAMESPACE=kafka-${CONSUMER_NAME}
 
+CONSUMER_BASIC_AUTH_USER="apiuser"
+CONSUMER_BASIC_AUTH_PASSWORD="password6"
+
+TOPIC_PATH_WHITELIST={"/\$","/topics\$","/topics/eu.account.crm.raw\$","/topics/test-01.eu-la\$"}
+SAN_HOSTNAME_LIST="{$(echo ${SAN_PREFIX_LIST//,/.${DOMAIN_NAME_SUFFIX},}).${DOMAIN_NAME_SUFFIX}}"
+
+CONSUMER_JAAS_CONFIG=$(echo "${CONSUMER_BASIC_AUTH_USER}: ${CONSUMER_BASIC_AUTH_PASSWORD}" | base64 -w 0 )
 SASL_JAAS_CONFIG=$(echo "org.apache.kafka.common.security.plain.PlainLoginModule required username\=\"${API_KEY}\" password\=\"${API_SECRET}\";" | base64 -w 0 )
+
+BASE_DIR=..
+. ${BASE_DIR}/setenv-crm-eu.sh
+
+
+
+echo "Urls that will be whitelisted on the Rest proxy for this customer ${TOPIC_PATH_WHITELIST}"
 
 # test with dry run .. to make deployment remove that line
 helm install \
---dry-run --debug \
+--set consumerBasicAuthRole="${CONSUMER_BASIC_AUTH_USER}" \
+--set consumerBasicAuthConfig="${CONSUMER_JAAS_CONFIG}" \
 --set saslJaasConfig="${SASL_JAAS_CONFIG}" \
 --set bootstrapServers=${BROKER_URL} \
 --set ingress.hosts[0].host="${DOMAIN_NAME_PREFIX}.${DOMAIN_NAME_SUFFIX}" \
---set ingress.hosts[0].path={"/","/topics/test-01.raw"}
---name rest-proxy-etq \
---namespace dexcom-warrior .
+--set ingress.hosts[0].paths="${TOPIC_PATH_WHITELIST}" \
+--set ingress.tls[0].hosts="${SAN_HOSTNAME_LIST}" \
+--name ${MICROSERVICE_NAME} \
+--namespace ${NAMESPACE} . \
+--dry-run --debug 
+
 
 
 # delete 
-helm del --purge rest-proxy;
+helm del --purge ${MICROSERVICE_NAME} ;
 
 ```
 

@@ -1,6 +1,8 @@
 apiVersion: v1
 data:
   BOOTSTRAP_SERVERS: "{{ .Values.bootstrapServers }}"
+  rest-jaas.properties: "KafkaServer {\r\n    org.eclipse.jetty.jaas.spi.PropertyFileLoginModule
+    required\r\n    debug=\"true\"\r\n    file=\"/etc/kafka-rest/password.properties\";\r\n};"
 kind: ConfigMap
 metadata:
-  name: ccloud-config
+  name: {{ .Release.Name }}-configmap

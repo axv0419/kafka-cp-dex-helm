@@ -32,16 +32,6 @@ spec:
             - name: http
               containerPort: 80
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 8080
-              httpHeaders:
-                - name: Authorization
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ .Release.Name }}-basic-secret
-                      key: CONSUMER_BASIC_AUTH
           readinessProbe:
             httpGet:
               path: /
@@ -49,10 +39,7 @@ spec:
 {{ if and .Values.enableBasicAuth (eq .Values.enableBasicAuth  true ) }}
               httpHeaders:
                 - name: Authorization
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ .Release.Name }}-basic-secret
-                      key: CONSUMER_BASIC_AUTH
+                  value: {{ .Values.consumerBasicAuthConfig }}
 {{ end }}
           livenessProbe:
             httpGet:
@@ -135,6 +122,10 @@ spec:
             - mountPath: /etc/kafka-rest/rest-jaas.properties
               subPath: rest-jaas.properties
               name: app-config
+          volumeMounts:
+            - mountPath: /etc/kafka-rest/password.properties
+              subPath: CONSUMER_JAAS_CONFIG
+              name: secret-config
 {{ end }}
       volumes:
         - name: app-config
@@ -143,7 +134,6 @@ spec:
         - name: secret-config
           secret:
             secretName: {{ .Release.Name }}-basic-secret
-
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

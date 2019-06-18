@@ -20,20 +20,17 @@ service:
 ingress:
   enabled: true
   annotations:
-    # nginx.ingress.kubernetes.io/upstream-vhost: "santash.boolan"
-    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    # nginx.ingress.kubernetes.io/rewrite-target: /
-    # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     nginx.ingress.kubernetes.io/whitelist-source-range: "66.85.67.20/32,76.88.0.202"
+    nginx.ingress.kubernetes.io/use-regex: "true"
     certmanager.k8s.io/cluster-issuer: letsencrypt-staging
     kubernetes.io/ingress.class: nginx
     kubernetes.io/tls-acme: "true"
   hosts:
     - host: event-bus-api-b.eu-dev.dexcom-apps.com
       paths: 
-        - "/"
-        - "/topics"
-        - "/topics/test-01.eu.raw"
+        - "^/$"
+        - "^/topics$"
+        - "^/topics/test-01.eu.raw$"
   tls:
   - secretName: tls-staging-cert
     hosts:
